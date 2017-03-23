@@ -1,15 +1,3 @@
-// Initialize Firebase
-var config = {
-	apiKey: "AIzaSyA3XgUuHlSTizqtriwrHWFNjlb0FD0AoLM",
-	authDomain: "mygreatapp-9e858.firebaseapp.com",
-	databaseURL: "https://mygreatapp-9e858.firebaseio.com",
-	storageBucket: "mygreatapp-9e858.appspot.com",
-	messagingSenderId: "1016802631233"
-};
-firebase.initializeApp(config);
-
-var database = firebase.database();
-
 var results = { 
 	// All possible plays and results
 	rp: 'p',
@@ -86,7 +74,7 @@ function displayNewGameButton() {
 }
 
 // Initialize page
-showPossibleMoves();
+//showPossibleMoves();
 
 // Get current user's move
 $('.move').click(function(){
@@ -100,51 +88,47 @@ $('.move').click(function(){
 
 });
 
-// Database listener
-
 // When a child is added
-database.ref().on('child_added', function(chSnapshot) {
-	// If it was the first move
-	if (!firstMoveHappened) {
-		// If it was my move
-		console.log('real move:',chSnapshot.val().move)
-		console.log(chSnapshot.key, 'should equal', myMoveKey)
-		if (isMyMove(chSnapshot.key, myMoveKey)) {
-			myMove = chSnapshot.val().move;
-			canMove = false;
-			displayWaiting();
-		// If it wasn't my move
-		} else {
-			// iAmPlayerOne = false;
-			oppoMove = chSnapshot.val().move;
-		}
-		firstMoveHappened = true;
-	// If it wasn't the first move
-	} else {
-		// If it was my move
-		console.log('real move:', chSnapshot.val().move)
-		if (isMyMove(chSnapshot.key, myMoveKey)) {
-			myMove = chSnapshot.val().move;
-			canMove = false;
-		// If it wasn't my move
-		} else {
-			oppoMove = chSnapshot.val().move;
-		}
-		if (!isTie(myMove, oppoMove)) {
-			if (isWinner(myMove, oppoMove)) {
-				myWins++;
-				displayResult(winString);
-				displayNewGameButton();
-			} else {
-				myLosses++;
-				displayResult(lossString);
-				displayNewGameButton();
-			}
-		} else {
-			myTies++;
-			displayResult(tieString);
-			displayNewGameButton();
-		}
-		database.ref().remove();
-	}
-});
+//database.ref().on('child_added', function(chSnapshot) {
+//	// If it was the first move
+//	if (!firstMoveHappened) {
+//		// If it was my move -- this is broken because myMovekey is set asynchronously and the callback happens after
+//		console.log(chSnapshot.key, 'should equal', myMoveKey)
+//		if (isMyMove(chSnapshot.key, myMoveKey)) {
+//			myMove = chSnapshot.val().move;
+//			canMove = false;
+//			displayWaiting();
+//		// If it wasn't my move
+//		} else {
+//			// iAmPlayerOne = false;
+//			oppoMove = chSnapshot.val().move;
+//		}
+//		firstMoveHappened = true;
+//	// If it wasn't the first move
+//	} else {
+//		// If it was my move
+//		if (isMyMove(chSnapshot.key, myMoveKey)) {
+//			myMove = chSnapshot.val().move;
+//			canMove = false;
+//		// If it wasn't my move
+//		} else {
+//			oppoMove = chSnapshot.val().move;
+//		}
+//		if (!isTie(myMove, oppoMove)) {
+//			if (isWinner(myMove, oppoMove)) {
+//				myWins++;
+//				displayResult(winString);
+//				displayNewGameButton();
+//			} else {
+//				myLosses++;
+//				displayResult(lossString);
+//				displayNewGameButton();
+//			}
+//		} else {
+//			myTies++;
+//			displayResult(tieString);
+//			displayNewGameButton();
+//		}
+//		database.ref().remove();
+//	}
+//});
