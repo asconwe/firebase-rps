@@ -3,7 +3,6 @@
 
 
 // Initialize Firebase
-// Initialize Firebase
 var config = {
     apiKey: "AIzaSyBh3FWJerRICwDBIA55IMaDtvm8NVoZ1rs",
     authDomain: "ropasci-2a5c8.firebaseapp.com",
@@ -22,6 +21,7 @@ var openGameInterval;
 var stillListening = true;
 var gameKey;
 var opponent;
+var stillListening2 = true;
 
 // App functions
 
@@ -37,11 +37,6 @@ function getOppoName(user1, user2) {
         return user2;
     }
     return user1;
-}
-
-// Once match is set, start the game
-function initializeGame() {
-    
 }
 
 // Once match is set, initialize the chat
@@ -75,7 +70,6 @@ function initializePage() {
         // Check for an open game for 500 ms
         // If there is no open game
         openGameInterval = setTimeout(function() {
-            console.log(userName);
             database.ref().push({
                 user1: userName
             }).then(function(snapshot){
@@ -83,11 +77,13 @@ function initializePage() {
                     gameKey: snapshot.key
                 });
                 gameKey = snapshot.key;
-                console.log('current gk:', gameKey);
+                console.log('a:', gameKey);
                 database.ref(gameKey).on('child_added', function(snapshot) {
-                    if (snapshot.val() !== userName) {
+                    if (snapshot.val() !== userName && stillListening2) {
                         opponent = snapshot.val();
-                        console.log(opponent);
+                        console.log('opponent value being passed to the function', opponent);
+                        runGame(userName, opponent, gameKey);
+                        stillListening2 = false;
                     }
                 });
             });
@@ -96,12 +92,14 @@ function initializePage() {
         
         // If there is an open game
         database.ref('openGame').once('child_added', function(snapshot) {
+            console.log('should only happen once');
             // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
             if (stillListening) {
                 // Prevent no open game option from running
                 clearInterval(openGameInterval);
                 // Get the unique identifier for this game
                 gameKey = snapshot.val();
+                console.log('b:', gameKey);
                 // Add the second user;
                 database.ref(gameKey).update({
                     user2: userName
@@ -114,8 +112,9 @@ function initializePage() {
                         console.log('op:', opponent);
                     });
                    });
-                initializeGame(snapshot.val());
-                initializeChat(snapshot.val());
+                   console.log('gameKey:', gameKey);
+                runGame(userName, opponent, gameKey);
+                initializeChat(userName, opponent, snapshot.val());
                 database.ref('openGame').remove();
             }
         
