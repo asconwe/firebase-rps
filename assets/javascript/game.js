@@ -13,8 +13,6 @@ function runGame(myName, opponentName, gameKey) {
     
     var myMove; // User's choice of rock, paper, or scissors
     var oppoMove; // Opponents choice of rock, paper, or scissors
-    var canMove = true; // User is allowed to make a move
-    var myMoveKey; // The unique ID of the Users move in database
     var myMoveIsThrown = false;
     var opponentMoveIsThrown = false;
     var myWins = 0;
@@ -79,21 +77,29 @@ function runGame(myName, opponentName, gameKey) {
     
     // Get current user's move
     $('.move').click(function(){
-        if (canMove) {
+        // If user has not yet submitted a move
+        if (!myMoveIsThrown) {
+            console.log('click handler/if my move is not thrown');
+            // Save the user's move
         	myMove = $(this).data('move');
         	// Submit the move and return true
         	myMoveIsThrown = submitMove(gameKey, myMove);
-        	canMove = false;
+        	// If the opponent has submitted a move, then compare user and opponent moves
         	if (opponentMoveIsThrown) {
+        	    console.log('if opponentMoveIsThrown');
+        	    // Check for a tie
                 if (isTie(myMove, oppoMove)) {
                     myTies++;
                     displayResult(tieString);
                     displayNewGameButton();
+                // If not a tie
                 } else {
+                    // If user won
                     if (isWinner(myMove, oppoMove)) {
                         myWins++;
                         displayResult(winString);
                         displayNewGameButton();
+                    // If user lost
                     } else {
                         myLosses++;
                         displayResult(lossString);
@@ -106,26 +112,41 @@ function runGame(myName, opponentName, gameKey) {
     
     });
     
+    // Listen for opponent moves to be added to the database
     database.ref(opRefString).on('value', function(snapshot) {
-        console.log('heard something');
-        oppoMove = snapshot.val();
-        if (myMoveIsThrown) {
-            if (isTie(myMove, oppoMove)) {
-                myTies++;
-                displayResult(tieString);
-                displayNewGameButton();
-            } else {
-                if (isWinner(myMove, oppoMove)) {
-                    myWins++;
-                    displayResult(winString);
+        console.log('!!!!opRefString', opRefString);
+        console.log(snapshot.val());
+        if (snapshot.val() !== null) {
+            // Save the opponent move
+            oppoMove = snapshot.val().move;
+            // Register that the opponent has made a move
+            opponentMoveIsThrown = true;
+            // If the user has submitted a move, too
+            console.log('in database listener, myMoveIsThrown:', myMoveIsThrown);
+            console.log('after database event, opRefString:', opRefString);
+            if (myMoveIsThrown) {
+                console.log('if myMoveIsThrown');
+                // Check for a tie
+                if (isTie(myMove, oppoMove)) {
+                    myTies++;
+                    displayResult(tieString);
                     displayNewGameButton();
+                // If not a tie
                 } else {
-                    myLosses++;
-                    displayResult(lossString);
-                    displayNewGameButton(); 
-                    
-                }  
-            } 
+                    // If the user won
+                    if (isWinner(myMove, oppoMove)) {
+                        myWins++;
+                        displayResult(winString);
+                        displayNewGameButton();
+                    // If the user lost
+                    } else {
+                        myLosses++;
+                        displayResult(lossString);
+                        displayNewGameButton(); 
+                        
+                    }  
+                } 
+            }
         }
     });
 //    // When a child is added

@@ -109,13 +109,11 @@ function initializePage() {
                         var user1 = snapshot2.val().user1;
                         var user2 = snapshot2.val().user2;
                         opponent = getOppoName(user1, user2);
-                        console.log('op:', opponent);
+                        runGame(userName, opponent, gameKey);
+                        initializeChat(userName, opponent, snapshot.val());
+                        database.ref('openGame').remove();
                     });
-                   });
-                   console.log('gameKey:', gameKey);
-                runGame(userName, opponent, gameKey);
-                initializeChat(userName, opponent, snapshot.val());
-                database.ref('openGame').remove();
+                });
             }
         
         });
