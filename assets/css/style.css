@@ -28,29 +28,15 @@ p {
 	padding: 10px 0 0 0;
 }
 
-button, .button {
+input, button {
 	background: none;
 	color: white;
 	border: solid 1px white;
 	padding: 5px;
 }
 
-form {
-	padding-top: 0;
-	padding-bottom: 10px;
-	margin-top: 10px;
-	margin-bottom: 10px;
-	border-top: solid 1px white;
-	border-bottom: solid 1px white;
-}
-
 .box {
 	width: 700px;
 	margin-left: auto;
 	margin-right: auto;
-}
-
-.categoryButton {
-	margin-right: 10px;
-	margin-bottom: 10px;
 }

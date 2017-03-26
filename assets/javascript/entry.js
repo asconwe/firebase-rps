@@ -48,7 +48,6 @@ function initializeChat() {
 // Initialize page
 function initializePage() {
     
-    console.log('happening');
     var form = $('<form id="userName">');
     var field = $('<input id="nameField" type="text">');
     var button = $('<input id="submitName" type="submit">');
@@ -60,7 +59,6 @@ function initializePage() {
     // After you submit your username, do these things
     $('#userName').submit(function(e) {
         
-        console.log('submitted');
         e.preventDefault();
         
         // set the userName
@@ -77,12 +75,11 @@ function initializePage() {
                     gameKey: snapshot.key
                 });
                 gameKey = snapshot.key;
-                console.log('a:', gameKey);
                 database.ref(gameKey).on('child_added', function(snapshot) {
-                    if (snapshot.val() !== userName && stillListening2) {
+                    if (snapshot.val() !== userName && snapshot.key !== 'newGame' &&stillListening2) {
                         opponent = snapshot.val();
-                        console.log('opponent value being passed to the function', opponent);
                         runGame(userName, opponent, gameKey);
+                        runChat(userName, opponent, gameKey);
                         stillListening2 = false;
                     }
                 });
@@ -92,17 +89,16 @@ function initializePage() {
         
         // If there is an open game
         database.ref('openGame').once('child_added', function(snapshot) {
-            console.log('should only happen once');
             // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
             if (stillListening) {
                 // Prevent no open game option from running
                 clearInterval(openGameInterval);
                 // Get the unique identifier for this game
                 gameKey = snapshot.val();
-                console.log('b:', gameKey);
                 // Add the second user;
                 database.ref(gameKey).update({
-                    user2: userName
+                    user2: userName,
+                    newGame: 'no'
                 }).then(function(){
                     // Get the opponent's user name
                     database.ref(gameKey).once('value', function(snapshot2) {
@@ -110,7 +106,7 @@ function initializePage() {
                         var user2 = snapshot2.val().user2;
                         opponent = getOppoName(user1, user2);
                         runGame(userName, opponent, gameKey);
-                        initializeChat(userName, opponent, snapshot.val());
+                        runChat(userName, opponent, snapshot.val());
                         database.ref('openGame').remove();
                     });
                 });
