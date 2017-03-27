@@ -28,7 +28,7 @@ var stillListening2 = true;
 
 // Display the waiting stuff
 function displayWaitingForOpponent() {
-    $('#display').html('<h3>... waiting for your opponent ...<h3>');
+    $('#display').html('<p>... waiting for your opponent ...<p>');
 }
 
 // Returns the opponent's user name
@@ -47,14 +47,17 @@ function initializeChat() {
 
 // Initialize page
 function initializePage() {
-    
+    var rps = $('<h2 id="title">1on1 RPS</h2>')
     var form = $('<form id="userName">');
+    var label = $('<p id="label">Choose your user name</p>')
     var field = $('<input id="nameField" type="text">');
     var button = $('<input id="submitName" type="submit">');
     var display = $('#display');
+    form.append(label);
     form.append(field);
     form.append(button);
-    display.html(form);
+    display.html(rps);
+    display.append(form);
 
     // After you submit your username, do these things
     $('#userName').submit(function(e) {
@@ -78,7 +81,7 @@ function initializePage() {
                 database.ref(gameKey).on('child_added', function(snapshot) {
                     if (snapshot.val() !== userName && snapshot.key !== 'newGame' &&stillListening2) {
                         opponent = snapshot.val();
-                        runGame(userName, opponent, gameKey);
+                        runGame(userName, opponent, gameKey, 0, 0);
                         runChat(userName, opponent, gameKey);
                         stillListening2 = false;
                     }
@@ -105,7 +108,8 @@ function initializePage() {
                         var user1 = snapshot2.val().user1;
                         var user2 = snapshot2.val().user2;
                         opponent = getOppoName(user1, user2);
-                        runGame(userName, opponent, gameKey);
+                        console.log(opponent);
+                        runGame(userName, opponent, gameKey, 0, 0);
                         runChat(userName, opponent, snapshot.val());
                         database.ref('openGame').remove();
                     });

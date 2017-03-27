@@ -1,6 +1,6 @@
 /*eslint-env jquery, browser*/
 
-function runGame(myName, opponentName, gameKey) {
+function runGame(myName, opponentName, gameKey, wins, losses) {
     var results = { 
     	// All possible plays and results
     	rp: 'p',
@@ -16,23 +16,12 @@ function runGame(myName, opponentName, gameKey) {
 
     var myMove = ''; // User's choice of rock, paper, or scissors
     var oppoMove = ''; // Opponents choice of rock, paper, or scissors
-    var myMoveIsThrown = false;
-    var opponentMoveIsThrown = false;
-    var resetOnMyClick = false;
-    var resetOnOpponentClick = false;
-    var myWins = 0;
-    var myLosses = 0;
-    var myTies = 0;
-    var winString = "Win";
-    var lossString = 'Loss';
-    var tieString = 'Tie';
     var opRefString = gameKey + '/moves/' + opponentName;
-    console.log('new game:', myMoveIsThrown, opponentMoveIsThrown, resetOnMyClick, resetOnOpponentClick, myMove, oppoMove);
+
     // Return true if it is a tie
     function isTie(m1, m2) {
     	return m1 === m2;
     }
-    
     
     // Return the true if you win, false if not
     function isWinner(m1, m2) {
@@ -53,22 +42,29 @@ function runGame(myName, opponentName, gameKey) {
     
     // Display moves
     function showPossibleMoves() {
-    	var rock = '<div id="rock" class="move" data-move="r"><h1>rock</h1></div>';
-    	var paper = '<div id="paper" class="move" data-move="p"><h1>paper</h1></div>';
-    	var scissors = '<div id="scissors" class="move" data-move="s"><h1>scissors</h1></div>';
+    	var rock = '<div id="rock" class="move" data-move="r"><h1>rock: \<\></h1></div>';
+    	var paper = '<div id="paper" class="move" data-move="p"><h1>paper: [ ]</h1></div>';
+    	var scissors = '<div id="scissors" class="move" data-move="s"><h1>scissors: 8\<</h1></div>';
     	$('#display').html(rock + paper + scissors);
     	setMoveClickHandler();
     	return true;    	
     }
+
+    function showScore() {
+        var myScore = $('<span class="my">' + myName + ': ' + wins + '</span>');
+        var opponentScore = $('<span class="op">' + opponentName + ': ' + losses + '</span>')
+        $('#score').html(myScore);
+        $('#score').append(opponentScore);
+    }
     
     // Display a 'waiting for opponent' message
     function displayWaiting() {
-        $('#display').html('<h2>Waiting for your opponent\'s move</h2>');
+        $('#display').html('<br><br><br><p>Waiting for ' + opponentName + '\'s move</br>');
     }
     
     // Display the result of the match
-    function displayResult(resultString) {
-        $('#display').html('<h1>' + resultString + '</h1>');
+    function displayResult(winnerString) {
+        $('#display').html('<br><br><br><p>' + winnerString + ' wins</p><br><br>');
     }
     
     // Display the 'New Game' button
@@ -80,7 +76,7 @@ function runGame(myName, opponentName, gameKey) {
     
     // Display a 'waiting for opponent to join' message
     function displayWaitingReset() {
-        $('#display').html('<h2>Waiting for you opponent to join the next match</h2>');
+        $('#display').html('<br><br><br><p>Waiting for ' + opponentName + ' to join the next match</p>');
     }
     
     // Set the database listener for resetting the game
@@ -92,7 +88,7 @@ function runGame(myName, opponentName, gameKey) {
                     displayWaitingReset();
                     if (snapshot.val()[opponentName] !== undefined) {
                         database.ref(gameKey + '/newGame/').set({});
-                        runGame(myName, opponentName, gameKey);
+                        runGame(myName, opponentName, gameKey, wins, losses);
                     }
                 }
             }
@@ -116,13 +112,15 @@ function runGame(myName, opponentName, gameKey) {
             // Save the user's move
         	myMove = $(this).data('move');
         	// Submit the move and return true
-        	myMoveIsThrown = submitMove(gameKey, myMove);     
+        	var myMoveIsThrown = submitMove(gameKey, myMove);     
         });
     }
 
     // When the game is loaded, do these things    
     // Show move options
     showPossibleMoves();
+
+    showScore();
     
     // Set the click handler
     setMoveClickHandler();
@@ -140,28 +138,21 @@ function runGame(myName, opponentName, gameKey) {
                     console.log(myMove, oppoMove);
                     // Check if it is a tie
                     if (isTie(myMove, oppoMove)) {
-                        console.log('tie');
-                        myTies++;
-                        displayResult(tieString);
-                        displayNewGameButton();
+                        displayResult('It\'s a tie! Everyone (and no one)');
                     // If not a tie
                     } else {
-                        console.log('non-tie');
                         // If user won
                         if (isWinner(myMove, oppoMove)) {
-                            console.log('win');
-                            myWins++;
-                            displayResult(winString);
-                            displayNewGameButton();
+                            displayResult(myName);                           
+                            wins++;
                         // If user lost
                         } else {
-                            console.log('lose');
-                            myLosses++;
-                            displayResult(lossString);
-                            displayNewGameButton();
-                            
+                            displayResult(opponentName);
+                            losses++;
                         }  
+                        showScore();
                     } 
+                    displayNewGameButton();
                 }
             }
         }

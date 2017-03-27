@@ -1,5 +1,5 @@
 body {
-	color: #edf;
+	color: white;
 	background: #101320;
 	font-family: 'Roboto', sans-serif;
 	font-weight: 100;
@@ -28,6 +28,12 @@ p {
 	padding: 10px 0 0 0;
 }
 
+form {
+	margin-right: auto;
+	margin-left: auto;
+	width: 300px;
+}
+
 input, button {
 	background: none;
 	color: white;
@@ -36,7 +42,100 @@ input, button {
 }
 
 .box {
-	width: 700px;
+	width: 400;
 	margin-left: auto;
 	margin-right: auto;
+	text-align: center;
+}
+
+#score {
+	width: 320px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#display {
+	height: 320px;
+	padding: 10px;
+}
+
+#title {
+	text-transform: capitalize;
+}
+
+#label {
+	margin-bottom: 20px;
+}
+
+#chatForm {
+	padding: none;
+	width: 350px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+#message {
+	width: 230px;
+}
+
+#send {
+	width: 80px;
+}
+
+#conversation {
+	width: 300px;
+	height: 100px;
+	padding: 10px;
+	border: solid 1px white;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	overflow-y: scroll;
+}
+
+#conversationList {
+	position: absolute;
+	top: auto;
+	bottom: 3px;
+	left: 3px;
+	right: 3px;
+}
+
+.opMessage {
+	float: right;
+}
+
+.myMessage {
+	float: left;
+}
+
+.messageBar {
+	width: 80%;
+	vertical-align: bottom;
+	padding-top: 3px;
+}
+
+.my {
+	float: left;
+	text-align: left;
+}
+
+.op {
+	float: right;
+	text-align: right;
+}
+
+#newGame {
+	width: 150px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.move {
+	width: 300px;
+	padding: 10px;
+	margin: 10px;
+	border: solid 1px white;
+	margin-right: auto;
+	margin-left: auto;
 }
