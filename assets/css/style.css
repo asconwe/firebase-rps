@@ -84,13 +84,13 @@ input, button {
 
 #conversation {
 	width: 300px;
-	height: 100px;
+	height: 98px;
 	padding: 10px;
 	border: solid 1px white;
 	position: relative;
 	margin-left: auto;
 	margin-right: auto;
-	overflow-y: scroll;
+	overflow: hidden;
 }
 
 #conversationList {
