@@ -58,60 +58,60 @@ $( document ).ready(function(){
         $('#userName').submit(function(e) {
             
             e.preventDefault();
-            
-            // set the userName
-            userName = $('#nameField').val();
-            // Show waiting screen
-            displayWaitingForOpponent();
-            // Check for an open game for 500 ms
-            // If there is no open game
-            openGameInterval = setTimeout(function() {
-                database.ref().push({
-                    user1: userName
-                }).then(function(snapshot){
-                    database.ref('openGame').set({
-                        gameKey: snapshot.key
-                    });
-                    gameKey = snapshot.key;
-                    database.ref(gameKey).on('child_added', function(snapshot) {
-                        if (snapshot.val() !== userName && snapshot.key !== 'newGame' &&stillListening2) {
-                            opponent = snapshot.val();
-                            runGame(userName, opponent, gameKey, 0, 0, database);
-                            runChat(userName, opponent, gameKey, database);
-                            stillListening2 = false;
-                        }
-                    });
-                });
-                stillListening = false;
-            }, 500);
-            
-            // If there is an open game
-            database.ref('openGame').once('child_added', function(snapshot) {
-                // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
-                if (stillListening) {
-                    // Prevent no open game option from running
-                    clearInterval(openGameInterval);
-                    // Get the unique identifier for this game
-                    gameKey = snapshot.val();
-                    // Add the second user;
-                    database.ref(gameKey).update({
-                        user2: userName,
-                        newGame: 'no'
-                    }).then(function(){
-                        // Get the opponent's user name
-                        database.ref(gameKey).once('value', function(snapshot2) {
-                            var user1 = snapshot2.val().user1;
-                            var user2 = snapshot2.val().user2;
-                            opponent = getOppoName(user1, user2);
-                            console.log(opponent);
-                            runGame(userName, opponent, gameKey, 0, 0, database);
-                            runChat(userName, opponent, snapshot.val(), database);
-                            database.ref('openGame').remove();
+            if ($('#nameField').val() !== '') {
+                // set the userName
+                userName = $('#nameField').val();
+                // Show waiting screen
+                displayWaitingForOpponent();
+                // Check for an open game for 500 ms
+                // If there is no open game
+                openGameInterval = setTimeout(function() {
+                    database.ref().push({
+                        user1: userName
+                    }).then(function(snapshot){
+                        database.ref('openGame').set({
+                            gameKey: snapshot.key
+                        });
+                        gameKey = snapshot.key;
+                        database.ref(gameKey).on('child_added', function(snapshot) {
+                            if (snapshot.val() !== userName && snapshot.key !== 'newGame' && stillListening2) {
+                                opponent = snapshot.val();
+                                runGame(userName, opponent, gameKey, 0, 0, database);
+                                runChat(userName, opponent, gameKey, database);
+                                stillListening2 = false;
+                            }
                         });
                     });
-                }
-            
-            });
+                    stillListening = false;
+                }, 500);
+                
+                // If there is an open game
+                database.ref('openGame').once('child_added', function(snapshot) {
+                    // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
+                    if (stillListening) {
+                        // Prevent no open game option from running
+                        clearInterval(openGameInterval);
+                        // Get the unique identifier for this game
+                        gameKey = snapshot.val();
+                        // Add the second user;
+                        database.ref(gameKey).update({
+                            user2: userName,
+                            newGame: 'no'
+                        }).then(function(){
+                            // Get the opponent's user name
+                            database.ref(gameKey).once('value', function(snapshot2) {
+                                var user1 = snapshot2.val().user1;
+                                var user2 = snapshot2.val().user2;
+                                opponent = getOppoName(user1, user2);
+                                console.log(opponent);
+                                runGame(userName, opponent, gameKey, 0, 0, database);
+                                runChat(userName, opponent, snapshot.val(), database);
+                                database.ref('openGame').remove();
+                            });
+                        });
+                    }
+                });
+            }
         });
     }
     
