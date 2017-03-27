@@ -2,6 +2,7 @@
  * 
  */
 
+/*eslint-env jquery */
 function runChat(myName, opponentName, gameKey, database) {
     
     function initializeChat() {
@@ -13,7 +14,7 @@ function runChat(myName, opponentName, gameKey, database) {
     	$('#chatForm').submit(function(event) {
     		event.preventDefault();
     		var message = $('#message').val();
-    		if (message != "") {
+    		if (message !== "") {
     			submitMessage(message);
     			displayMessage(false, message);
     			$('#message').val('');
@@ -43,16 +44,17 @@ function runChat(myName, opponentName, gameKey, database) {
     function submitMessage(message) {
     	database.ref(gameKey + '/chat/' + myName).push({
     		message: message
-    	})
+    	});
     }
 
     function displayMessage(isOpponent, message) {
 		var messageBar = $('<li>');
+		var htmlMessage;
     	if (isOpponent) {
-    		var htmlMessage = $('<span class="opMessage">');
-    		messageBar.attr('class', 'op messageBar')
+    		htmlMessage = $('<span class="opMessage">');
+    		messageBar.attr('class', 'op messageBar');
     	} else {
-			var htmlMessage = $('<span class="myMessage">');
+			htmlMessage = $('<span class="myMessage">');
 			messageBar.attr('class', 'my messageBar');
     	}
 		htmlMessage.text(message);

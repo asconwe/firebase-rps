@@ -27,6 +27,34 @@ $( document ).ready(function(){
     // App functions
     
     
+    // Animates to a new background color -- Dependent on jQuery Color
+    function newBackgroundColor(target) {
+        function randomDarkColorValue() {
+            return String(Math.floor(Math.random() * 5)) + String(Math.floor(Math.random() * 9));
+        }
+        
+        function randomMediumColorValue() {
+            return String(Math.floor((Math.random() * 5) + 5)) + String(Math.floor(Math.random() * 9));
+        }
+        
+        function getHexColor(a, b, c) {
+            var randNumb = Math.floor(Math.random() * 3);
+            if (randNumb === 1) {
+                return '#' + a + b + c;
+            } else if (randNumb === 2) {
+                return '#' + b + c + a;
+            }
+            return '#' + c + a + b;
+        }
+        
+        var a = randomDarkColorValue();
+        var b = randomDarkColorValue();
+        var c = randomMediumColorValue();
+        var randomColor = getHexColor(a, b, c);
+        $(target).animate({backgroundColor: randomColor} , 200, function(){
+        });
+    }
+    
     // Display the waiting stuff
     function displayWaitingForOpponent() {
         $('#display').html('<p>... waiting for your opponent ...<p>');
@@ -56,16 +84,19 @@ $( document ).ready(function(){
     
         // After you submit your username, do these things
         $('#userName').submit(function(e) {
-            
             e.preventDefault();
+            
+            // Animate a new background color on the body
+            newBackgroundColor('body');
+            // If the name field is not empty
             if ($('#nameField').val() !== '') {
                 // set the userName
-                userName = $('#nameField').val();
-                // Show waiting screen
-                displayWaitingForOpponent();
+                userName = $('#nameField').val();                
                 // Check for an open game for 500 ms
                 // If there is no open game
                 openGameInterval = setTimeout(function() {
+                    // Show waiting screen
+                    displayWaitingForOpponent();
                     database.ref().push({
                         user1: userName
                     }).then(function(snapshot){
@@ -76,7 +107,7 @@ $( document ).ready(function(){
                         database.ref(gameKey).on('child_added', function(snapshot) {
                             if (snapshot.val() !== userName && snapshot.key !== 'newGame' && stillListening2) {
                                 opponent = snapshot.val();
-                                runGame(userName, opponent, gameKey, 0, 0, database);
+                                runGame(userName, opponent, gameKey, 0, 0, database, runGame);
                                 runChat(userName, opponent, gameKey, database);
                                 stillListening2 = false;
                             }
@@ -89,25 +120,34 @@ $( document ).ready(function(){
                 database.ref('openGame').once('child_added', function(snapshot) {
                     // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
                     if (stillListening) {
+                        console.log('should happen only once');
                         // Prevent no open game option from running
                         clearInterval(openGameInterval);
                         // Get the unique identifier for this game
                         gameKey = snapshot.val();
-                        // Add the second user;
-                        database.ref(gameKey).update({
-                            user2: userName,
-                            newGame: 'no'
-                        }).then(function(){
-                            // Get the opponent's user name
-                            database.ref(gameKey).once('value', function(snapshot2) {
-                                var user1 = snapshot2.val().user1;
-                                var user2 = snapshot2.val().user2;
-                                opponent = getOppoName(user1, user2);
-                                console.log(opponent);
-                                runGame(userName, opponent, gameKey, 0, 0, database);
-                                runChat(userName, opponent, snapshot.val(), database);
-                                database.ref('openGame').remove();
-                            });
+                        database.ref(gameKey).once('value', function(snapshot2) {
+                            console.log('should also happen only once');
+                            // If the opponents name is not the same as the user's name
+                            if (snapshot2.val().user1 !== userName) {
+                                displayWaitingForOpponent();
+                                // Add the second user;
+                                database.ref(gameKey).update({
+                                    user2: userName,
+                                    newGame: 'no'
+                                }).then(function(){
+                                    // Get the opponent's user name
+                                    database.ref(gameKey).once('value', function(snapshot3) {
+                                        var user1 = snapshot3.val().user1;
+                                        var user2 = snapshot3.val().user2;
+                                        opponent = getOppoName(user1, user2);
+                                        runGame(userName, opponent, gameKey, 0, 0, database, runGame);
+                                        runChat(userName, opponent, gameKey, database);
+                                        database.ref('openGame').remove();
+                                    });
+                                });
+                            } else {
+                                $('#label').html('That\'s your opponent\'s name - pick another');
+                            }
                         });
                     }
                 });
@@ -118,31 +158,4 @@ $( document ).ready(function(){
     // On the page load, do these things
     // Set up the page;
     initializePage();
-    
-    $('body').click(function(){
-        function randomDarkColorValue() {
-            return String(Math.floor(Math.random() * 5)) + String(Math.floor(Math.random() * 9));
-        }
-        
-        function randomMediumColorValue() {
-            return String(Math.floor((Math.random() * 5) + 5)) + String(Math.floor(Math.random() * 9));
-        }
-        
-        function getHexColor(a, b, c) {
-            var randNumb = Math.floor(Math.random() * 3);
-            if (randNumb === 1) {
-                return '#' + a + b + c;
-            } else if (randNumb === 2) {
-                return '#' + b + c + a;
-            }
-            return '#' + c + a + b;
-        }
-        
-        var a = randomDarkColorValue();
-        var b = randomDarkColorValue();
-        var c = randomMediumColorValue();
-        var randomColor = getHexColor(a, b, c);
-        $('body').animate({backgroundColor: randomColor} , 200, function(){
-        });
-    });
 });    
