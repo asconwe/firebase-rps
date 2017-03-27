@@ -1,6 +1,7 @@
 /*eslint-env jquery, browser*/
 
-function runGame(myName, opponentName, gameKey, wins, losses) {
+/*globals database */
+function runGame(myName, opponentName, gameKey, wins, losses, database) {
     var results = { 
     	// All possible plays and results
     	rp: 'p',
@@ -10,13 +11,11 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
     	sp: 's',
     	rs: 'r'
     };
-    
-    //Debuggin
-    var isFalse = false;
 
     var myMove = ''; // User's choice of rock, paper, or scissors
     var oppoMove = ''; // Opponents choice of rock, paper, or scissors
-    var opRefString = gameKey + '/moves/' + opponentName;
+    var newWins = wins;
+    var newLosses = losses;
 
     // Return true if it is a tie
     function isTie(m1, m2) {
@@ -52,7 +51,7 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
 
     function showScore() {
         var myScore = $('<span class="my">' + myName + ': ' + wins + '</span>');
-        var opponentScore = $('<span class="op">' + opponentName + ': ' + losses + '</span>')
+        var opponentScore = $('<span class="op">' + opponentName + ': ' + losses + '</span>');
         $('#score').html(myScore);
         $('#score').append(opponentScore);
     }
@@ -64,12 +63,11 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
     
     function getFullStr(move) {
         if (move === 's') {
-            return 'scissors'
+            return 'scissors';
         } else if (move === 'p') {
-            return 'paper'
-        } else {
-            return 'rock'
-        }
+            return 'paper';
+        } 
+        return 'rock';
     }
 
     // Display the result of the match
@@ -98,7 +96,7 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
                     displayWaitingReset();
                     if (snapshot.val()[opponentName] !== undefined) {
                         database.ref(gameKey + '/newGame/').set({});
-                        runGame(myName, opponentName, gameKey, wins, losses);
+                        runGame(myName, opponentName, gameKey, newWins, newLosses, database);
                     }
                 }
             }
@@ -122,7 +120,7 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
             // Save the user's move
         	myMove = $(this).data('move');
         	// Submit the move and return true
-        	var myMoveIsThrown = submitMove(gameKey, myMove);     
+        	submitMove(gameKey, myMove);     
         });
     }
 
@@ -154,11 +152,11 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
                         // If user won
                         if (isWinner(myMove, oppoMove)) {
                             displayResult(myName);                           
-                            wins++;
+                            newWins = wins + 1;
                         // If user lost
                         } else {
                             displayResult(opponentName);
-                            losses++;
+                            newLosses = losses + 1;
                         }  
                         showScore();
                     } 

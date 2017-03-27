@@ -2,7 +2,7 @@
  * 
  */
 
-function runChat(myName, opponentName, gameKey) {
+function runChat(myName, opponentName, gameKey, database) {
     
     function initializeChat() {
     	setChatSubmitHandler();
