@@ -63,9 +63,12 @@ $( document ).ready(function(){
             if ($('#nameField').val() !== '') {
                 // set the userName
                 userName = $('#nameField').val();                
-                // Check for an open game for 500 ms
+                // Check for an open game
                 // If there is no open game
-                openGameInterval = setTimeout(function() {
+                console.log(opponent);
+                // If no opponent yet
+                if (opponent === undefined) {
+                    console.log('no opponent');
                     // Show waiting screen
                     displayWaitingForOpponent();
                     database.ref().push({
@@ -75,52 +78,43 @@ $( document ).ready(function(){
                             gameKey: snapshot.key
                         });
                         gameKey = snapshot.key;
-                        database.ref(gameKey).on('child_added', function(snapshot) {
-                            if (snapshot.val() !== userName && snapshot.key !== 'newGame' && stillListening2) {
-                                opponent = snapshot.val();
-                                runGame(userName, opponent, gameKey, 0, 0, database, runGame);
-                                runChat(userName, opponent, gameKey, database);
-                                stillListening2 = false;
-                            }
-                        });
                     });
-                    stillListening = false;
-                }, 500);
-                
-                // If there is an open game
-                database.ref('openGame').once('child_added', function(snapshot) {
-                    // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
-                    if (stillListening) {
-                        // Prevent no open game option from running
-                        clearInterval(openGameInterval);
-                        // Get the unique identifier for this game
-                        gameKey = snapshot.val();
-                        database.ref(gameKey).once('value', function(snapshot2) {
-                            // If the opponents name is not the same as the user's name
-                            if (snapshot2.val().user1 !== userName) {
-                                displayWaitingForOpponent();
-                                // Add the second user;
-                                database.ref(gameKey).update({
-                                    user2: userName,
-                                    newGame: 'no'
-                                }).then(function(){
-                                    // Get the opponent's user name
-                                    database.ref(gameKey).once('value', function(snapshot3) {
-                                        var user1 = snapshot3.val().user1;
-                                        var user2 = snapshot3.val().user2;
-                                        opponent = getOppoName(user1, user2);
-                                        runGame(userName, opponent, gameKey, 0, 0, database, runGame);
-                                        runChat(userName, opponent, gameKey, database);
-                                        database.ref('openGame').remove();
-                                    });
-                                });
-                            } else {
-                                $('#label').html('That\'s your opponent\'s name - pick another');
-                            }
-                        });
-                    }
-                });
+                } else {
+                    console.log('has opponent, this gamekey', gameKey);
+                    database.ref(gameKey).update({
+                        user2: userName
+                    });
+                    database.ref('openGame').remove();
+                }
             }
+        });
+
+        // If there is an open game
+        database.ref('openGame').on('child_added', function(snapshot) {
+            gameKey = snapshot.val();
+            // When a new game is opened, listen to that new game room
+            // when that new game has 
+            database.ref(snapshot.val()).on('value', function(snapshot2){
+                console.log(snapshot2.val())
+                if (snapshot2.val().user1 === userName) {
+                    opponent = snapshot2.val().user2;
+                    if (opponent !== undefined) {
+                        runGame(userName, opponent, gameKey, 0, 0, database, runGame);
+                        runChat(userName, opponent, gameKey, database);
+                        database.ref('openGame').off('child_added');
+                        database.ref(snapshot.val()).off('value');
+                    }
+                } else {
+                    opponent = snapshot2.val().user1;
+                    console.log('opponent', opponent);
+                    if (snapshot2.val().user2 !== undefined) {
+                        runGame(userName, opponent, gameKey, 0, 0, database, runGame);
+                        runChat(userName, opponent, gameKey, database);
+                        database.ref('openGame').off('child_added');
+                        database.ref(snapshot.val()).off('value');
+                    }
+                }
+            });
         });
     }
     
