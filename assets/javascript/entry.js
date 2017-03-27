@@ -26,35 +26,6 @@ $( document ).ready(function(){
     
     // App functions
     
-    
-    // Animates to a new background color -- Dependent on jQuery Color
-    function newBackgroundColor(target) {
-        function randomDarkColorValue() {
-            return String(Math.floor(Math.random() * 5)) + String(Math.floor(Math.random() * 9));
-        }
-        
-        function randomMediumColorValue() {
-            return String(Math.floor((Math.random() * 5) + 5)) + String(Math.floor(Math.random() * 9));
-        }
-        
-        function getHexColor(a, b, c) {
-            var randNumb = Math.floor(Math.random() * 3);
-            if (randNumb === 1) {
-                return '#' + a + b + c;
-            } else if (randNumb === 2) {
-                return '#' + b + c + a;
-            }
-            return '#' + c + a + b;
-        }
-        
-        var a = randomDarkColorValue();
-        var b = randomDarkColorValue();
-        var c = randomMediumColorValue();
-        var randomColor = getHexColor(a, b, c);
-        $(target).animate({backgroundColor: randomColor} , 200, function(){
-        });
-    }
-    
     // Display the waiting stuff
     function displayWaitingForOpponent() {
         $('#display').html('<p>... waiting for your opponent ...<p>');
@@ -120,13 +91,11 @@ $( document ).ready(function(){
                 database.ref('openGame').once('child_added', function(snapshot) {
                     // If the open game interval hasn't timed out (so, if there is an available game, only before the game is set up)
                     if (stillListening) {
-                        console.log('should happen only once');
                         // Prevent no open game option from running
                         clearInterval(openGameInterval);
                         // Get the unique identifier for this game
                         gameKey = snapshot.val();
                         database.ref(gameKey).once('value', function(snapshot2) {
-                            console.log('should also happen only once');
                             // If the opponents name is not the same as the user's name
                             if (snapshot2.val().user1 !== userName) {
                                 displayWaitingForOpponent();

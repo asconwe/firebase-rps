@@ -1,6 +1,35 @@
 /*eslint-env jquery, browser*/
-
 /*globals database */
+
+// Animates to a new background color -- Dependent on jQuery Color
+function newBackgroundColor(target) {
+    function randomDarkColorValue() {
+        return String(Math.floor(Math.random() * 5)) + String(Math.floor(Math.random() * 9));
+    }
+    
+    function randomMediumColorValue() {
+        return String(Math.floor((Math.random() * 5) + 5)) + String(Math.floor(Math.random() * 9));
+    }
+    
+    function getHexColor(a, b, c) {
+        var randNumb = Math.floor(Math.random() * 3);
+        if (randNumb === 1) {
+            return '#' + a + b + c;
+        } else if (randNumb === 2) {
+            return '#' + b + c + a;
+        }
+        return '#' + c + a + b;
+    }
+    
+    var a = randomDarkColorValue();
+    var b = randomDarkColorValue();
+    var c = randomMediumColorValue();
+    var randomColor = getHexColor(a, b, c);
+    $(target).animate({backgroundColor: randomColor} , 200, function(){
+    });
+}
+
+// Runs the game
 function runGame(myName, opponentName, gameKey, wins, losses, database) {
         var results = { 
         	// All possible plays and results
@@ -15,6 +44,7 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
         var myMove = ''; // User's choice of rock, paper, or scissors
         var oppoMove = ''; // Opponents choice of rock, paper, or scissors
 
+        // Game logic
     
         // Return true if it is a tie
         function isTie(m1, m2) {
@@ -38,6 +68,8 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
         	return true;
         }
         
+        // Display functions
+
         // Display moves
         function showPossibleMoves() {
         	var rock = '<div id="rock" class="move" data-move="r"><h1>rock: \<\></h1></div>';
@@ -90,7 +122,7 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
         function setNewGameDatabaseListener() {
             database.ref(gameKey + '/newGame').on('value', function(snapshot){
                 // If both users have submitted their move
-                if (snapshot.val()[myName] !== null || snapshot.val()[opponentName] !== null) {
+                if (snapshot.val() !== null) {
                     if (snapshot.val()[myName] !==  undefined) {
                         displayWaitingReset();
                         if (snapshot.val()[opponentName] !== undefined) {
@@ -100,7 +132,8 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
                             showScore();
                             // Set the click handler
                             setMoveClickHandler();
-                            database.ref(gameKey).off();
+                            newBackgroundColor('body');
+                            database.ref(gameKey + '/newGame').off('value');
                         }
                     }
                 }
@@ -140,14 +173,12 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
         // Listen for opponent moves to be added to the database
         database.ref(gameKey + '/moves').on('value', function(snapshot) {
             // If both users have submitted their move
-            if (snapshot.val()[myName] !== null || snapshot.val()[opponentName] !== null) {
+            if (snapshot.val() !== null) {
                 if (snapshot.val()[myName] !==  undefined) {
                     displayWaiting();
                     if (snapshot.val()[opponentName] !== undefined) {
-                        console.log('really made it');
                         myMove = snapshot.val()[myName].move;
                         oppoMove = snapshot.val()[opponentName].move;
-                        console.log(myMove, oppoMove);
                         // Check if it is a tie
                         if (isTie(myMove, oppoMove)) {
                             displayResult('It\'s a tie! Everyone (and no one)');
@@ -164,6 +195,7 @@ function runGame(myName, opponentName, gameKey, wins, losses, database) {
                             }  
                             showScore();
                         } 
+                        newBackgroundColor('body');
                         displayNewGameButton();
                     }
                 }
