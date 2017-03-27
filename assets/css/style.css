@@ -39,7 +39,6 @@ input, button {
 	color: white;
 	border: solid 1px white;
 	padding: 5px;
-	font-family: monospace;
 }
 
 .box {
@@ -53,7 +52,6 @@ input, button {
 	width: 320px;
 	margin-left: auto;
 	margin-right: auto;
-	font-family: monospace;
 }
 
 #display {
@@ -78,12 +76,10 @@ input, button {
 
 #message {
 	width: 230px;
-	font-family: monospace;
 }
 
 #send {
 	width: 80px;
-	font-family: monospace;
 }
 
 #conversation {
@@ -95,7 +91,6 @@ input, button {
 	margin-left: auto;
 	margin-right: auto;
 	overflow-y: scroll;
-	font-family: monospace;
 }
 
 #conversationList {
