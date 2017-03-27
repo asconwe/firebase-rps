@@ -62,9 +62,19 @@ function runGame(myName, opponentName, gameKey, wins, losses) {
         $('#display').html('<br><br><br><p>Waiting for ' + opponentName + '\'s move</br>');
     }
     
+    function getFullStr(move) {
+        if (move === 's') {
+            return 'scissors'
+        } else if (move === 'p') {
+            return 'paper'
+        } else {
+            return 'rock'
+        }
+    }
+
     // Display the result of the match
     function displayResult(winnerString) {
-        $('#display').html('<br><br><br><p>' + winnerString + ' wins</p><br><br>');
+        $('#display').html('<br><br><br><p>' + myName + ': ' + getFullStr(myMove) + '</p><br><p>' + opponentName + ': ' + getFullStr(oppoMove) + '</p><br><p>' + winnerString + ' wins</p><br><br>');
     }
     
     // Display the 'New Game' button
